@@ -1,0 +1,10 @@
+server:
+  port: "8000"
+
+database:
+  host: "localhost"
+  port: "5437"
+  username: "postgres"
+  password: "qwerty"
+  dbname: "todo_app"
+  sslmode: "disable"
