@@ -16,43 +16,27 @@ type TodoList interface {
 	Create(userId int, list todo.TodoList) (int, error)
 	GetAll(userId int) ([]todo.TodoList, error)
 	GetById(userId int, listId int) (todo.TodoList, error)
+	Delete(userId, listId int) error
+	Update(userId, listId int, input todo.UpdateListInput) error
 }
-
-type TodoIdea interface {
+type TodoItem interface {
+	Create(listId int, item todo.TodoItem) (int, error)
+	GetAll(userId, listId int) ([]todo.TodoItem, error)
+	GetById(userId, listId, itemId int) (todo.TodoItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, input todo.UpdateItemInput) error
 }
 
 type Repository struct {
 	Authorisation
 	TodoList
-	TodoIdea
+	TodoItem
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorisation: NewAuthPostgres(db),
 		TodoList:      NewTodoListPostgress(db),
+		TodoItem:      NewTodoItemPostgres(db),
 	}
 }
-
-// func NewPostgresDB() (*sql.DB, error) {
-// 	host := viper.GetString("database.host")
-// 	port := viper.GetString("database.port")
-// 	username := viper.GetString("database.username")
-// 	password := viper.GetString("database.password")
-// 	dbname := viper.GetString("database.dbname")
-// 	sslmode := viper.GetString("database.sslmode")
-
-// 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-// 		host, port, username, password, dbname, sslmode)
-
-// 	db, err := sql.Open("postgres", dsn)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to open database: %w", err)
-// 	}
-
-// 	if err := db.Ping(); err != nil {
-// 		return nil, fmt.Errorf("failed to ping database: %w", err)
-// 	}
-
-// 	return db, nil
-// }

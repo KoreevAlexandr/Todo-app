@@ -11,7 +11,7 @@ const (
 	todoListsTable = "todo_lists"
 	userListsTable = "users_lists"
 	todoItemsTable = "todo_items"
-	listItemsTable = "list_items"
+	listItemsTable = "lists_items"
 )
 
 type Config struct {
@@ -37,23 +37,3 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
 
 	return db, nil
 }
-
-// import (
-// 	"database/sql"
-// )
-
-// type PostgresDB struct {
-// 	db *sql.DB
-// }
-
-// func NewPostgresDB(db *sql.DB) *PostgresDB {
-// 	return &PostgresDB{db: db}
-// }
-
-// func (p *PostgresDB) Close() error {
-// 	return p.db.Close()
-// }
-
-// func (p *PostgresDB) GetDB() *sql.DB {
-// 	return p.db
-// }

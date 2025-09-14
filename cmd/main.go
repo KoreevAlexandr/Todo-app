@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 	"todo-app"
 	"todo-app/pkg/handler"
 	"todo-app/pkg/repository"
@@ -36,14 +39,7 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
-	// Подключение к базе данных
-	// db, err := repository.NewPostgresDB()
-	// if err != nil {
-	// 	log.Fatalf("failed to connect to database: %s", err.Error())
-	// }
-	// defer db.Close()
 
-	// Запуск миграций
 	if err := repository.RunMigrations(db.DB); err != nil {
 		logrus.Fatalf("failed to run migrations: %s", err.Error())
 	}
@@ -53,8 +49,26 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("server.port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http %s", err.Error())
+	go func() {
+		if err := srv.Run(viper.GetString("server.port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http %s", err.Error())
+		}
+	}()
+
+	logrus.Print("TodoApp Started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Print("TodoApp Shutting Down")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error occured on db connection close: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured on db connection close: %s", err.Error())
 	}
 }
 
